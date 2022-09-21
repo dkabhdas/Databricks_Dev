@@ -38,3 +38,10 @@ display(df1)
 
 # COMMAND ----------
 
+departmentsWithEmployeesSeq2 = [departmentWithEmployees3, departmentWithEmployees4]
+df2 = spark.createDataFrame(departmentsWithEmployeesSeq2)
+
+df2.show(truncate=False)
+
+# COMMAND ----------
+
