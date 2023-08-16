@@ -41,7 +41,8 @@ We will be using ***SAP Data Services*** as consumer.
 Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the objects are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.
 
 1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.
-   ![Tux, the Linux mascot](../img/data_store.png)
+
+   <img src="../img/data_store.png" alt="dataservices datastore" width="200" height="250"/>
 
 2. To import the required ODP-enabled object, follow these steps:
    * Double-click on the Datastore to view the list of ODP-enabled objects.
