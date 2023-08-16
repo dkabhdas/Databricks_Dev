@@ -42,7 +42,7 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
 
 1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.
 
-   <img src="../img/data_store.png" alt="dataservices datastore" width="200" height="250"/>
+   <img src="../img/data_store.png" alt="dataservices datastore" width="300" height="300"/>
 
 2. To import the required ODP-enabled object, follow these steps:
    * Double-click on the Datastore to view the list of ODP-enabled objects.
