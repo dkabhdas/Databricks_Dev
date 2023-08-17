@@ -8,7 +8,7 @@
 
 Operational Data Provisioning (ODP) supports extraction and replication scenarios for various target applications and incorporates delta mechanisms in these scenarios. When dealing with a delta procedure, data from a source (referred to as the ODP Provider) is automatically written to a delta queue, known as the Operational Delta Queue (ODQ), through an update process or passed to the delta queue via an extractor interface. The ODQ effectively tracks new and modified records since the last extraction, facilitating incremental data updates.
 
-<img src="../img/ODP.png" alt="odp" height="500"/>
+<img src="../img/odp.png" alt="odp" height="500"/>
 
 ### ***ODP Context or Provider***
 
@@ -69,11 +69,11 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
 
 4. Create a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account. Refer to the baseplate document to bring your own bucket (Baseplate BYOB).
    
-   <img src="../img/file_location.png" alt="dataservices datastore" height="400"/>
+   <img src="../img/file_location.png" alt="file location" height="400"/>
 
 5. Create a Data Services job that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
    
-   <img src="../img/ds_job.png" alt="dataservices datastore" height="400"/>
+   <img src="../img/ds_job.png" alt="dataservices job" height="400"/>
 
 ## ***Data Load into LEGO Nexus Bronze table from S3 :***
 
