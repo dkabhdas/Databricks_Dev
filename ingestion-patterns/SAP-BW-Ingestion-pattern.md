@@ -1,8 +1,16 @@
-# Operational Data Provisioning (ODP) and Delta Queue (ODQ) based Extraction
+# SAP BW Data Incremental Ingestion to LEGO Nexus
+
+
+
+## ***Incremental Extraction and landing it in S3 :***
+
+## ***Operational Data Provisioning (ODP) and Delta Queue (ODQ) based Extraction***
 
 Operational Data Provisioning (ODP) supports extraction and replication scenarios for various target applications and incorporates delta mechanisms in these scenarios. When dealing with a delta procedure, data from a source (referred to as the ODP Provider) is automatically written to a delta queue, known as the Operational Delta Queue (ODQ), through an update process or passed to the delta queue via an extractor interface. The ODQ effectively tracks new and modified records since the last extraction, facilitating incremental data updates.
 
-## ODP Context or Provider
+<img src="../img/odp.png" alt="odp" height="500"/>
+
+### ***ODP Context or Provider***
 
 An ODP context represents a source of ODPs. Context identifiers are present for all technologies whose analytical views can be exposed as ODPs. Currently, the following ODP contexts are available (depending on release):
 
@@ -20,7 +28,7 @@ An ODP context represents a source of ODPs. Context identifiers are present for 
 In our extraction process, we will utilize the BW context and retrieve data from the ***BW DataStore***.
 
 
-## ODP Subscribers or Consumers
+### ***ODP Subscribers or Consumers***
 
 Currently, the following subscriber types are available (depending on release):
 
@@ -36,43 +44,40 @@ Currently, the following subscriber types are available (depending on release):
 
 We will be using ***SAP Data Services*** as consumer.
 
-# SAP Data Services
+## ***Extraction using SAP Data Services***
 
-Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the objects are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.
+Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the BW data store objects(DSO) are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.
 
 1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.
 
-   <img src="../img/data_store.png" alt="dataservices datastore" height="300"/>
+   <img src="../img/data_store.png" alt="dataservices datastore" height="400"/>
 
 2. To import the required ODP-enabled object, follow these steps:
    * Double-click on the Datastore to view the list of ODP-enabled objects.
    * Identify the necessary ODP extractors from the list.
    * Right-click on the desired ODP extractor and choose the "Import" option.
-3. **CDC Mode**: When importing any ODP, one can choose between query mode or CDC mode. Here we will use Change-data Capture (CDC) mode extractor. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.
+   
+   <img src="../img/odp_import.png" alt="odp import" height="400"/>
 
-4. Create a cloud storage file location to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account. Refer to the baseplate document to bring your own bucket (Baseplate BYOB).
+   
+
+3. During import provide the consumer name and project name and **CDC Mode**. When importing any ODP, one can choose between query mode or CDC mode. For incremental extraction choose CDC. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.
+
+   <img src="../img/cdc.png" alt="cdc enabled" height="400"/>
+
+   <img src="../img/after_import.png" alt="after odp import"/>
+
+4. Create a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account. Refer to the baseplate document to bring your own bucket (Baseplate BYOB).
+   
+   <img src="../img/file_location.png" alt="dataservices datastore" height="400"/>
 
 5. Create a Data Services job that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
+   
+   <img src="../img/ds_job.png" alt="dataservices datastore" height="400"/>
 
+## ***Data Load into LEGO Nexus Bronze table from S3 :***
 
-## CDC Mode
-
-When importing any ODP, you can choose between query mode or CDC mode. Here, we will use Change-data Capture (CDC) mode extractor. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.
-
-## Cloud Storage File Location
-
-1. Create a cloud storage file location to land the file in the landing S3 bucket.
-2. The team responsible for the Data Producer role has their own AWS Account.
-3. Refer to the baseplate document to bring your own bucket (Baseplate BYOB).
-
-## Data Services Job
-
-1. Create a Data Services job that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
-2. If the initial load is set to 'Yes,' it will import all the data during the first execution.
-3. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
-
-
-# Implement CDC (Change Data Capture) Pipeline With Delta Lake
+### ***Implement CDC (Change Data Capture) Pipeline With Delta Lake***
 
 Delta Lake is designed to support CDC workloads by offering support for UPDATE, DELETE, and MERGE operations. Additionally, Delta tables can facilitate CDC to capture internal changes and propagate these changes downstream. When used in conjunction with Delta Lake, Autoloader enables the reading of incremental files from an S3 location and simplifies the process of upserting them into downstream Delta tables.
 
