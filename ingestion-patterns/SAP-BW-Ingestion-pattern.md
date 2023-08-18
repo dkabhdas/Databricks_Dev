@@ -75,6 +75,14 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
    
    <img src="../img/ds_job.png" alt="dataservices job" height="400"/>
 
+6. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
+
+   <img src="../img/source_initial_load.png" alt="initial load" height="400"/>
+   
+   
+
+
+
 ## ***Data Load into LEGO Nexus Bronze table from S3 :***
 
 ### ***Implement CDC (Change Data Capture) Pipeline With Delta Lake***
