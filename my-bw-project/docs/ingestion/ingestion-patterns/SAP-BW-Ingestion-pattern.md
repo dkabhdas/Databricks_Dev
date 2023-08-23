@@ -3,11 +3,12 @@
 
 ## ***Prerequisites***
 
-* Review the principles and guidelines to publish data from SAP BW to Lego Nexus outlined in<a href="https://baseplate.legogroup.io/docs/default/component/engineering-matters/data-matters/guidelines/03-data-office-bw-core-publication-guidelines/">
+* Review the principles and guidelines to publish data from SAP BW to Lego Nexus outlined in<a href="https://baseplate.legogroup.io/docs/default/component/engineering-matters/data-matters/guidelines/03-data-office-bw-core-publication-guidelines/" target="_blank">
 data-matters Baseplate</a> document.
-* Data products should be registered using the data product registration template as described in the [registration guide](https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/registration/#how-to-register-a-data-product).
-* If a BI engineering product team doesn't have an application in <a href="https://lego.leanix.net/architecturegateway/dashboard/">Architecture Gateway</a>, they need to register one (or more if necessary) so that the source of the data is correctly represented and linked to the correct digital product. User <a href="https://legogroup.atlassian.net/wiki/spaces/ARC/pages/1651576072/How+to+-+Create+an+Application+in+Architecture+Gateway">guide</a> to Create an application in Architecture Gateway.
-* Prior to commencing the implementation of the CDC pipeline in Databricks, it is essential to configure the S3 bucket and establish a connection by linking your S3 bucket through the External location. The process for bringing your own bucket, requesting storage credentials and external location for a S3 bucket is outlined in detail within the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">
+* Data products should be registered using the data product registration template as described in the <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/registration/#how-to-register-a-data-product" target="_blank">
+registration guide</a> document.
+* If a BI engineering product team doesn't have an application in <a href="https://lego.leanix.net/architecturegateway/dashboard/" target="_blank">Architecture Gateway</a>, they need to register one (or more if necessary) so that the source of the data is correctly represented and linked to the correct digital product. User <a href="https://legogroup.atlassian.net/wiki/spaces/ARC/pages/1651576072/How+to+-+Create+an+Application+in+Architecture+Gateway" target="_blank">guide</a> to Create an application in Architecture Gateway.
+* Prior to commencing the implementation of the CDC pipeline in Databricks, it is essential to configure the S3 bucket and establish a connection by linking your S3 bucket through the External location. The process for bringing your own bucket, requesting storage credentials and external location for a S3 bucket is outlined in detail within the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob" target="_blank">
 BYOB</a> document.
 
 ## ***Architectural flow diagram***
@@ -62,34 +63,40 @@ Currently, the following subscriber types are available (depending on release):
 Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the BW data store objects(DSO) are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.
 
 1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.<br><img src="../../img/data_store.png" alt="dataservices datastore" height="400"/><br>
-2. To import the required ODP-enabled object, follow these steps:<br>
-      <br>
-      a. Double-click on the Datastore to view the list of ODP-enabled objects.<br>
-      b. Identify the necessary ODP extractors from the list.<br>
-      c. Right-click on the desired ODP extractor and choose the "Import" option.<br><img src="../../img/odp_import.png" alt="odp import" height="500"/>
-      <br>
+2. To import the required ODP-enabled object, follow these steps:
+   <ul>
+      <li>Double-click on the Datastore to view the list of ODP-enabled objects.</li>
+      <li>Identify the necessary ODP extractors from the list</li>
+      <li>Right-click on the desired ODP extractor and choose the "Import" option.</li>
+   </ul>
+      <img src="../../img/odp_import.png" alt="odp import" height="500"/>
+
 3. During import provide the consumer name and project name and **CDC Mode**. When importing any ODP, one can choose between query mode or CDC mode. For incremental extraction choose CDC. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.
    ![cdc enabled](../img/cdc.png)
    <br>
-4. If the file location isn't already created for that S3 landing bucket then reate a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.<br>
-      <br>
-      a. If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">BYOB</a> document.<br>
-      b. create an IAM user in the AWS account and Set permissions to read and write files from S3.<br>
+4. If the file location isn't already created for that S3 landing bucket then reate a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.
+   <ul>
+      <li>If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob" target="_blank">BYOB</a> document.</li>
+      <li>create an IAM user in the AWS account and Set permissions to read and write files from S3.</li>
+   </ul>
       ![file location](../img/file_location.png)
-      <br>
+
 5. Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.
    ![file location](../img/data_flow.png)
    ![ds script](../img/ds_script.png)
-   <br>
+
 6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
    ![dataservices job](../img/ds_job.png)
-   <br>
+
 7. The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.
-   ![map cdc](../img/map_cdc.png)<br>
+   ![map cdc](../img/map_cdc.png)
+
 8. The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)
-   ![file name](../img/ds_file_name.png)<br>
+   ![file name](../img/ds_file_name.png)
+
 9. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
    ![dataservices job](../img/source_initial_load.png)
+
 10. The sample output file contains a column labeled ***ODQ_CHANGEMODE***, serving as an indicator for operational types. The potential values include:<br>
       ***C*** - New Record <br>
       ***U*** - Updated Record <br>
