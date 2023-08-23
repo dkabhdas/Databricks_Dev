@@ -79,11 +79,12 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
       <li>If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob" target="_blank">BYOB</a> document.</li>
       <li>create an IAM user in the AWS account and Set permissions to read and write files from S3.</li>
    </ul>
-   
+
       ![file location](../img/file_location.png)
 
 5. Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.<br>
-   ![file location](../img/data_flow.png)
+   ![file location](../img/data_flow.png)<br>
+   Data services script<br>
    ![ds script](../img/ds_script.png)
 
 6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.<br>
