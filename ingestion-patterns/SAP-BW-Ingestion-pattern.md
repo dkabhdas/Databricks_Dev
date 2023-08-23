@@ -8,7 +8,7 @@
 
 Operational Data Provisioning (ODP) supports extraction and replication scenarios for various target applications and incorporates delta mechanisms in these scenarios. When dealing with a delta procedure, data from a source (referred to as the ODP Provider) is automatically written to a delta queue, known as the Operational Delta Queue (ODQ), through an update process or passed to the delta queue via an extractor interface. The ODQ effectively tracks new and modified records since the last extraction, facilitating incremental data updates.
 
-<img src="../img/odp.png" alt="odp" height="500"/>
+![ODP](../img/odp.png)
 
 ### ***ODP Context or Provider***
 
