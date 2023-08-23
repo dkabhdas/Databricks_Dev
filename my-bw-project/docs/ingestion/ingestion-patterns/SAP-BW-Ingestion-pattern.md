@@ -12,9 +12,10 @@ BYOB</a> document.
 
 ## ***Architectural flow diagram***
 
-<img src="../../img/architecture_diagram.png" alt="architecture" height="500"/>
+![architecture](../img/architecture_diagram.png)
 
 ## ***Incremental Extraction and landing it in S3***
+----------------------------------------------------
 
 ### ***Operational Data Provisioning (ODP) and Delta Queue (ODQ) based Extraction :***
 
@@ -54,67 +55,49 @@ Currently, the following subscriber types are available (depending on release):
 | HANA_SDI          | SAP HANA Smart Data Integration                  |
 
 
-We will be using ***SAP Data Services*** as consumer.
+***SAP Data Services*** will be the consumer here.
 
 ### ***Extraction using SAP Data Services :***
 
 Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the BW data store objects(DSO) are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.
 
-1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.
-
-   <img src="../img/data_store.png" alt="dataservices datastore" height="400"/>
-
-2. To import the required ODP-enabled object, follow these steps:
-   * Double-click on the Datastore to view the list of ODP-enabled objects.
-   * Identify the necessary ODP extractors from the list.
-   * Right-click on the desired ODP extractor and choose the "Import" option.
-   
-   <img src="../img/odp_import.png" alt="odp import" height="400"/>
-
-   
-
+1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.<br><img src="../../img/data_store.png" alt="dataservices datastore" height="400"/><br>
+2. To import the required ODP-enabled object, follow these steps:<br>
+      a. Double-click on the Datastore to view the list of ODP-enabled objects.<br>
+      b. Identify the necessary ODP extractors from the list.<br>
+      c. Right-click on the desired ODP extractor and choose the "Import" option.<br><img src="../../img/odp_import.png" alt="odp import" height="500"/>
+      <br>
 3. During import provide the consumer name and project name and **CDC Mode**. When importing any ODP, one can choose between query mode or CDC mode. For incremental extraction choose CDC. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.
-
-   <img src="../img/cdc.png" alt="cdc enabled" height="400"/>
-
-   <img src="../img/after_import.png" alt="after odp import"/>
-
-4. If the file location isn't already created for that S3 landing bucket then reate a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.
-   - If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">BYOB</a> document.
-   - create an IAM user in the AWS account and Set permissions to read and write files from S3.
-   
-   <img src="../img/file_location.png" alt="file location" height="400"/>
-
+   ![cdc enabled](../img/cdc.png)
+   <br>
+4. If the file location isn't already created for that S3 landing bucket then reate a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.<br>
+      a. If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">BYOB</a> document.<br>
+      b. create an IAM user in the AWS account and Set permissions to read and write files from S3.<br>
+      ![file location](../img/file_location.png)
+      <br>
 5. Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.
-   
-   <img src="../img/data_flow.png" alt="data_flow"/>
-   </br>
-   <img src="../img/ds_script.png" alt="script"/>
-
+   ![file location](../img/data_flow.png)
+   ![ds script](../img/ds_script.png)
+   <br>
 6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
-   
-   <img src="../img/ds_job.png" alt="dataservices job" height="400"/>
 
+   ![dataservices job](../img/ds_job.png)
+   <br>
 7. The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.
+
+   ![map cdc](../img/map_cdc.png)
+8. The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)
    
-   <img src="../img/map_cdc.png" alt="map cdc" height="400"/>
+   ![file name](../img/ds_file_name.png)
+9. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
 
-8.  The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)
-   
-   <img src="../img/ds_file_name.png" alt="file name" height="400"/>
+   ![dataservices job](../img/source_initial_load.png)
+10. The sample output file contains a column labeled ***ODQ_CHANGEMODE***, serving as an indicator for operational types. The potential values include:<br>
+      ***C*** - New Record <br>
+      ***U*** - Updated Record <br>
+      ***D*** - Deleted Record <br>
 
-
-9.  If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
-
-   <img src="../img/source_initial_load.png" alt="dataservices job" height="300"/>
-
-10.  The sample output file contains a column labeled ***ODQ_CHANGEMODE***, serving as an indicator for operational types. The potential values include:
-   
-      ***C*** - New Record </br>
-      ***U*** - Updated Record </br>
-      ***D*** - Deleted Record </br>
-
-      <img src="../img/sample_file.png" alt="sample file"/>
+      ![sample file](../img/sample_file.png)
 
 
 ## ***Data Load into LEGO Nexus Bronze table from S3***
