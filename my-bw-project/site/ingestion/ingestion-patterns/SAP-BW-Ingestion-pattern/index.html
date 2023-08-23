@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>***SAP BW Data Incremental Ingestion to LEGO Nexus*** - My Docs</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">My Docs</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../../.." class="nav-link">Welcome to MkDocs</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Ingestion <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Ingestion patterns</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="./" class="dropdown-item active">***SAP BW Data Incremental Ingestion to LEGO Nexus***</a>
+</li>
+    </ul>
+  </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../.." class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#sap-bw-data-incremental-ingestion-to-lego-nexus" class="nav-link">SAP BW Data Incremental Ingestion to LEGO Nexus</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#architectural-flow-diagram" class="nav-link">Architectural flow diagram</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#incremental-extraction-and-landing-it-in-s3" class="nav-link">Incremental Extraction and landing it in S3</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#data-load-into-lego-nexus-bronze-table-from-s3" class="nav-link">Data Load into LEGO Nexus Bronze table from S3</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="sap-bw-data-incremental-ingestion-to-lego-nexus"><strong><em>SAP BW Data Incremental Ingestion to LEGO Nexus</em></strong></h1>
+<h2 id="prerequisites"><strong><em>Prerequisites</em></strong></h2>
+<ul>
+<li>Review the principles and guidelines to publish data from SAP BW to Lego Nexus outlined in<a href="https://baseplate.legogroup.io/docs/default/component/engineering-matters/data-matters/guidelines/03-data-office-bw-core-publication-guidelines/">
+data-matters Baseplate</a> document.</li>
+<li>Data products should be registered using the data product registration template as described in the <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/registration/#how-to-register-a-data-product">registration guide</a>.</li>
+<li>If a BI engineering product team doesn't have an application in <a href="https://lego.leanix.net/architecturegateway/dashboard/">Architecture Gateway</a>, they need to register one (or more if necessary) so that the source of the data is correctly represented and linked to the correct digital product. User <a href="https://legogroup.atlassian.net/wiki/spaces/ARC/pages/1651576072/How+to+-+Create+an+Application+in+Architecture+Gateway">guide</a> to Create an application in Architecture Gateway.</li>
+<li>Prior to commencing the implementation of the CDC pipeline in Databricks, it is essential to configure the S3 bucket and establish a connection by linking your S3 bucket through the External location. The process for bringing your own bucket, requesting storage credentials and external location for a S3 bucket is outlined in detail within the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">
+BYOB</a> document.</li>
+</ul>
+<h2 id="architectural-flow-diagram"><strong><em>Architectural flow diagram</em></strong></h2>
+<p><img src="../../img/architecture_diagram.png" alt="architecture" height="500"/></p>
+<h2 id="incremental-extraction-and-landing-it-in-s3"><strong><em>Incremental Extraction and landing it in S3</em></strong></h2>
+<h3 id="operational-data-provisioning-odp-and-delta-queue-odq-based-extraction"><strong><em>Operational Data Provisioning (ODP) and Delta Queue (ODQ) based Extraction :</em></strong></h3>
+<p>Operational Data Provisioning (ODP) supports extraction and replication scenarios for various target applications and incorporates delta mechanisms in these scenarios. When dealing with a delta procedure, data from a source (referred to as the ODP Provider) is automatically written to a delta queue, known as the Operational Delta Queue (ODQ), through an update process or passed to the delta queue via an extractor interface. The ODQ effectively tracks new and modified records since the last extraction, facilitating incremental data updates.</p>
+<p><img alt="ODP" src="../../img/odp.png" /></p>
+<h4 id="odp-context-or-provider"><strong><em>ODP Context or Provider</em></strong></h4>
+<p>An ODP context represents a source of ODPs. Context identifiers are present for all technologies whose analytical views can be exposed as ODPs. Currently, the following ODP contexts are available (depending on release):</p>
+<table>
+<thead>
+<tr>
+<th>Provider Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ABAP_CDS</td>
+<td>ABAP Core Data Services</td>
+</tr>
+<tr>
+<td>BW</td>
+<td>SAP NetWeaver / BW/4HANA</td>
+</tr>
+<tr>
+<td>BYD</td>
+<td>SAP Business ByDesign. Data from MDAV extracted via ODP. Implemented via SOAP Web Service.</td>
+</tr>
+<tr>
+<td>ESH</td>
+<td>Search and operational analytics</td>
+</tr>
+<tr>
+<td>HANA</td>
+<td>SAP HANA Information View</td>
+</tr>
+<tr>
+<td>SAPI</td>
+<td>SAP Service Application Programming Interface (S-API) for SAP DataSources</td>
+</tr>
+<tr>
+<td>SLT~</td>
+<td>SAP Landscape Transformation Replication Server</td>
+</tr>
+</tbody>
+</table>
+<p>In our extraction process, we will utilize the BW context and retrieve data from the <strong><em>BW DataStore</em></strong>.</p>
+<h4 id="odp-subscribers-or-consumers"><strong><em>ODP Subscribers or Consumers</em></strong></h4>
+<p>Currently, the following subscriber types are available (depending on release):</p>
+<table>
+<thead>
+<tr>
+<th>Subscribers</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SAP_BW/4HANA</td>
+<td>SAP NetWeaver Business Warehouse</td>
+</tr>
+<tr>
+<td>DS</td>
+<td>SAP Business Objects Data Services</td>
+</tr>
+<tr>
+<td>TREX_ES</td>
+<td>SAP NetWeaver Embedded Analytics. Query is defined on transient provider, derived from ODP</td>
+</tr>
+<tr>
+<td>RODPS_REPL_TEST</td>
+<td>Created by executing report RODPS_REPL_TEST (in transaction SE38)</td>
+</tr>
+<tr>
+<td>RSODP_ODATA</td>
+<td>Open Data Protocol (OData)</td>
+</tr>
+<tr>
+<td>HANA_SDI</td>
+<td>SAP HANA Smart Data Integration</td>
+</tr>
+</tbody>
+</table>
+<p>We will be using <strong><em>SAP Data Services</em></strong> as consumer.</p>
+<h3 id="extraction-using-sap-data-services"><strong><em>Extraction using SAP Data Services :</em></strong></h3>
+<p>Data Services has seamless integration capabilities with SAP ODP-enabled data sources. In Lego BW system, most of the BW data store objects(DSO) are ODP enabled, and SAP Data Services can use extractors for data extraction through the ODP API framework.</p>
+<ol>
+<li>To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.</li>
+</ol>
+<p><img src="../img/data_store.png" alt="dataservices datastore" height="400"/></p>
+<ol>
+<li>To import the required ODP-enabled object, follow these steps:</li>
+<li>Double-click on the Datastore to view the list of ODP-enabled objects.</li>
+<li>Identify the necessary ODP extractors from the list.</li>
+<li>Right-click on the desired ODP extractor and choose the "Import" option.</li>
+</ol>
+<p><img src="../img/odp_import.png" alt="odp import" height="400"/></p>
+<ol>
+<li>During import provide the consumer name and project name and <strong>CDC Mode</strong>. When importing any ODP, one can choose between query mode or CDC mode. For incremental extraction choose CDC. Each of these projects will be a separate subscription in the source system, which you can view in the T-CODE ODQMON.</li>
+</ol>
+<p><img src="../img/cdc.png" alt="cdc enabled" height="400"/></p>
+<p><img src="../img/after_import.png" alt="after odp import"/></p>
+<ol>
+<li>If the file location isn't already created for that S3 landing bucket then reate a <strong><em>cloud storage file location</em></strong> to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.</li>
+<li>If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">BYOB</a> document.</li>
+<li>create an IAM user in the AWS account and Set permissions to read and write files from S3.</li>
+</ol>
+<p><img src="../img/file_location.png" alt="file location" height="400"/></p>
+<ol>
+<li>Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.</li>
+</ol>
+<p><img src="../img/data_flow.png" alt="data_flow"/>
+   </br>
+   <img src="../img/ds_script.png" alt="script"/></p>
+<ol>
+<li>Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.</li>
+</ol>
+<p><img src="../img/ds_job.png" alt="dataservices job" height="400"/></p>
+<ol>
+<li>The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.</li>
+</ol>
+<p><img src="../img/map_cdc.png" alt="map cdc" height="400"/></p>
+<ol>
+<li>The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)</li>
+</ol>
+<p><img src="../img/ds_file_name.png" alt="file name" height="400"/></p>
+<ol>
+<li>If the <strong><em>initial load</em></strong> is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.</li>
+</ol>
+<p><img src="../img/source_initial_load.png" alt="dataservices job" height="300"/></p>
+<ol>
+<li>
+<p>The sample output file contains a column labeled <strong><em>ODQ_CHANGEMODE</em></strong>, serving as an indicator for operational types. The potential values include:</p>
+<p><strong><em>C</em></strong> - New Record </br>
+  <strong><em>U</em></strong> - Updated Record </br>
+  <strong><em>D</em></strong> - Deleted Record </br></p>
+<p><img src="../img/sample_file.png" alt="sample file"/></p>
+</li>
+</ol>
+<h2 id="data-load-into-lego-nexus-bronze-table-from-s3"><strong><em>Data Load into LEGO Nexus Bronze table from S3</em></strong></h2>
+<h3 id="implement-cdc-change-data-capture-pipeline-with-delta-lake"><strong><em>Implement CDC (Change Data Capture) Pipeline With Delta Lake :</em></strong></h3>
+<p>Delta Lake is designed to support CDC workloads by offering support for UPDATE, DELETE, and MERGE operations. Additionally, Delta tables can facilitate CDC to capture internal changes and propagate these changes downstream. When used in conjunction with Delta Lake, Autoloader enables the reading of incremental files from an S3 location and simplifies the process of upserting them into downstream Delta tables.</p>
+<p>To enhance efficiency, we are moving away from using CSV storage for CDC information and opting to store it in a Delta table. For example, below code will ingest the incremental files from the S3 location to a bronze table using Autoloader: </p>
+<pre><code class="language-python">checkpoint_path = &quot;/Volumes/&lt;catalog_name&gt;/&lt;bronze_schema_name&gt;/&lt;volume_name&gt;/&lt;sub_path_bronze_table&gt;&quot;
+bronzeDF = (spark.readStream
+    .format(&quot;cloudFiles&quot;)
+    .option(&quot;cloudFiles.format&quot;, &quot;CSV&quot;)
+    .option(&quot;header&quot;, &quot;true&quot;)
+    .option(&quot;cloudFiles.schemaLocation&quot;, checkpoint_path)
+    .load(&quot;s3://&lt;landing-bucket&gt;/&lt;path-to-files&gt;&quot;))
+
+(bronzeDF.writeStream
+    .option(&quot;checkpointLocation&quot;, checkpoint_path)
+    .trigger(availableNow=True)
+    .toTable(&quot;&lt;catalog_name&gt;.&lt;bronze_schema_name&gt;.&lt;cdc_bronze_table_name&gt;&quot;))
+</code></pre>
+<p>Define the <strong><em>MERGE</em></strong> statement to upsert the CDC information in our final table. Please be aware that the use of "DELETE" is discretionary; only employ it when an actual deletion is occurring at the source. Alternatively, if the source incorporates an active or inactive flag, the "UPDATE" action will adequately address the situation.</p>
+<pre><code class="language-python">sql_query = &quot;&quot;&quot;
+  MERGE INTO &lt;silver_table_name&gt; a
+  USING stream_updates b
+  ON a.&lt;key_field&gt; = b.&lt;key_field&gt;
+  WHEN MATCHED AND b.&lt;OPERATION_FIELD&gt; = 'U' THEN UPDATE SET *
+  WHEN NOT MATCHED AND b.&lt;OPERATION_FIELD&gt; = 'C' THEN INSERT *
+  WHEN MATCHED AND b.&lt;OPERATION_FIELD&gt; = 'D' THEN DELETE
+</code></pre>
+<p>For each batch / incremental update from the raw bronze table, this function will run a MERGE on the silver table.</p>
+<pre><code class="language-python">def merge_stream(df, i):
+  df.createOrReplaceTempView(&quot;stream_updates&quot;)
+  df._jdf.sparkSession().sql(sql_query)
+</code></pre>
+<p>For finalizing the process, create a silver table:</p>
+<pre><code class="language-sql">%sql
+use catalog &lt;catalog_name&gt;;
+use schema &lt;silver_schema_name&gt;;
+CREATE TABLE IF NOT EXISTS &lt;silver_table_name&gt; AS  SELECT * FROM &lt;bronze_schema_name&gt;.&lt;cdc_bronze_table_name&gt; WHERE 1=2
+</code></pre>
+<p>Retrieve data from the bronze table with delta changes Upsert-Merge it into the silver table using the previously defined merge_stream function:</p>
+<pre><code class="language-python">checkpoint_path = &quot;/Volumes/&lt;catalog_name&gt;/&lt;silver_schema_name&gt;/&lt;volume_name&gt;/&lt;sub_path_silver_table&gt;&quot;
+(spark
+   .readStream.table(&quot;&lt;cdc_bronze_table_name&gt;&quot;)
+   .filter(&quot;&lt;filter_condition&gt;&quot;)
+   .writeStream
+        .foreachBatch(merge_stream)
+       .option(&quot;checkpointLocation&quot;, checkpoint_path_silver)
+       .trigger(availableNow=True)
+       .start())
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
