@@ -15,7 +15,7 @@ BYOB</a> document.
 ![architecture](../img/architecture_diagram.png)
 
 ## ***Incremental Extraction and landing it in S3***
-----------------------------------------------------
+-----------------------------------------------------
 
 ### ***Operational Data Provisioning (ODP) and Delta Queue (ODQ) based Extraction :***
 
@@ -63,6 +63,7 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
 
 1. To extract data from the BW system using extractors, you should have a Datastore configured as the source in Data Services with BW ODP context.<br><img src="../../img/data_store.png" alt="dataservices datastore" height="400"/><br>
 2. To import the required ODP-enabled object, follow these steps:<br>
+      <br>
       a. Double-click on the Datastore to view the list of ODP-enabled objects.<br>
       b. Identify the necessary ODP extractors from the list.<br>
       c. Right-click on the desired ODP extractor and choose the "Import" option.<br><img src="../../img/odp_import.png" alt="odp import" height="500"/>
@@ -71,6 +72,7 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
    ![cdc enabled](../img/cdc.png)
    <br>
 4. If the file location isn't already created for that S3 landing bucket then reate a ***cloud storage file location*** to land the file in the landing S3 bucket. The team taking the role of the Data Producer has their own AWS Account.<br>
+      <br>
       a. If the S3 bucket for landing data hasn't been created yet, please refer to the 'Create AWS Bucket' section in the Baseplate <a href="https://baseplate.legogroup.io/docs/default/component/self-service-core-data-platform/ingestion/ingestion-patterns/byob">BYOB</a> document.<br>
       b. create an IAM user in the AWS account and Set permissions to read and write files from S3.<br>
       ![file location](../img/file_location.png)
@@ -80,17 +82,13 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
    ![ds script](../img/ds_script.png)
    <br>
 6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
-
    ![dataservices job](../img/ds_job.png)
    <br>
 7. The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.
-
-   ![map cdc](../img/map_cdc.png)
+   ![map cdc](../img/map_cdc.png)<br>
 8. The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)
-   
-   ![file name](../img/ds_file_name.png)
+   ![file name](../img/ds_file_name.png)<br>
 9. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
-
    ![dataservices job](../img/source_initial_load.png)
 10. The sample output file contains a column labeled ***ODQ_CHANGEMODE***, serving as an indicator for operational types. The potential values include:<br>
       ***C*** - New Record <br>
@@ -101,8 +99,7 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
 
 
 ## ***Data Load into LEGO Nexus Bronze table from S3***
-
-
+----------------------------------------------------
 ### ***Implement CDC (Change Data Capture) Pipeline With Delta Lake :***
 
 Delta Lake is designed to support CDC workloads by offering support for UPDATE, DELETE, and MERGE operations. Additionally, Delta tables can facilitate CDC to capture internal changes and propagate these changes downstream. When used in conjunction with Delta Lake, Autoloader enables the reading of incremental files from an S3 location and simplifies the process of upserting them into downstream Delta tables.
