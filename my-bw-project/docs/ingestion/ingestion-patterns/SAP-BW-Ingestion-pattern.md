@@ -81,20 +81,20 @@ Data Services has seamless integration capabilities with SAP ODP-enabled data so
    </ul>
       ![file location](../img/file_location.png)
 
-5. Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.
+5. Before the DataFlow, a scipt can be used to create CSV file names with a dynamic timestamp.<br>
    ![file location](../img/data_flow.png)
    ![ds script](../img/ds_script.png)
 
-6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.
+6. Create a Data Services data flow that uses an ODP (Operational Data Provisioning) object as the source and exports the data to a specified file location.<br>
    ![dataservices job](../img/ds_job.png)
 
-7. The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.
+7. The way we use MAP CDC Operation depends on what we need – whether to send all the changes that happened over time or just the current information. This choice is based on the type of extractor we're using.<br>
    ![map cdc](../img/map_cdc.png)
 
-8. The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)
+8. The "File name(s)" points output of the script in the step no 5 to create a dynamic file name with a timestamp ($Name1)<br>
    ![file name](../img/ds_file_name.png)
 
-9. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.
+9. If the ***initial load*** is set to 'Yes,' it will import all the data during the first execution. Subsequently, for incremental loads, it should be set to 'No' after the initial execution.<br>
    ![dataservices job](../img/source_initial_load.png)
 
 10. The sample output file contains a column labeled ***ODQ_CHANGEMODE***, serving as an indicator for operational types. The potential values include:<br>
