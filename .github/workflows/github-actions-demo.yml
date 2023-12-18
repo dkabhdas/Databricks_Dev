@@ -9,7 +9,6 @@ on:
     - cron: '15 6 * * 0'
   workflow_dispatch:
 jobs:
-
   # DEV Deployment Job
   Dev:
     environment: dev
