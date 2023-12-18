@@ -16,7 +16,7 @@ jobs:
     
     steps:
       
-      - name: Install Databricks CLI
+      - name: My First Action
         run: echo "Hello Action"
 
   
